@@ -1,0 +1,392 @@
+/* ============================================
+   DeliHub Mini App — Phase 1 Styles
+   Mobile-first · RTL · Telegram-like theme
+   ============================================ */
+
+/* ---------- CSS Custom Properties ---------- */
+/*
+  Single source of truth for colors, spacing, and radii.
+  When dark mode is added later, we only swap these variables
+  on a parent class (e.g. .theme-dark).
+*/
+:root {
+  /* Background layers — darkest to lightest */
+  --bg-primary: #0f0f1a;
+  --bg-secondary: #1a1a2e;
+  --bg-card: #16213e;
+  --bg-card-hover: #1a2744;
+
+  /* Text */
+  --text-primary: #eaf0fb;
+  --text-secondary: #8892a4;
+  --text-muted: #5a6478;
+
+  /* Accent — Telegram-blue inspired but slightly warmer */
+  --accent: #3b82f6;
+  --accent-soft: rgba(59, 130, 246, 0.15);
+
+  /* Live badge */
+  --badge-live: #22c55e;
+  --badge-live-soft: rgba(34, 197, 94, 0.15);
+
+  /* Danger / error (reserved for future use) */
+  --danger: #ef4444;
+
+  /* Borders */
+  --border-color: rgba(255, 255, 255, 0.06);
+  --border-radius-sm: 10px;
+  --border-radius-md: 16px;
+  --border-radius-lg: 22px;
+
+  /* Spacing scale */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --space-2xl: 48px;
+
+  /* Typography */
+  --font-family: 'Vazirmatn', 'Segoe UI', Tahoma, Arial, sans-serif;
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-base: 1rem;
+  --font-size-lg: 1.25rem;
+  --font-size-xl: 1.75rem;
+  --font-size-2xl: 2.25rem;
+
+  /* Transitions */
+  --transition-fast: 150ms ease;
+  --transition-normal: 300ms ease;
+
+  /* Shadows — subtle because Telegram UI is flat */
+  --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.25);
+}
+
+/* ---------- Reset & Base ---------- */
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  /* Prevent rubber-banding scroll on iOS but keep scroll behavior */
+  overflow: hidden;
+  height: 100%;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  font-family: var(--font-family);
+  font-size: var(--font-size-base);
+  color: var(--text-primary);
+  background-color: var(--bg-primary);
+  direction: rtl;
+  text-align: right;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Load Vazirmatn — the most popular Persian web font */
+/* Using a CDN mirror; swap to self-hosted in production for offline support */
+@import url('https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css');
+
+/* ---------- App Shell ---------- */
+#app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100dvh; /* Dynamic viewport height — handles mobile browser chrome */
+  padding: var(--space-md);
+  padding-top: env(safe-area-inset-top, var(--space-md));
+  padding-bottom: env(safe-area-inset-bottom, var(--space-md));
+  max-width: 480px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* ---------- Header ---------- */
+#header {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: var(--space-md) 0;
+  margin-bottom: var(--space-md);
+}
+
+.header__title {
+  font-size: var(--font-size-xl);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+  line-height: 1.2;
+}
+
+.header__subtitle {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  margin-top: var(--space-xs);
+}
+
+/* ---------- Main Content ---------- */
+#content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+/* ---------- Card ---------- */
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-lg);
+  padding: var(--space-lg);
+  box-shadow: var(--shadow-card);
+  transition: background var(--transition-normal),
+              border-color var(--transition-normal);
+}
+
+/* Hover state for future multi-card layouts */
+.card:hover {
+  background: var(--bg-card-hover);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Card Header */
+.card__header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-lg);
+}
+
+.card__icon {
+  font-size: var(--font-size-xl);
+  line-height: 1;
+}
+
+.card__title {
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  color: var(--text-secondary);
+  flex: 1;
+}
+
+/* "Live" badge */
+.card__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  color: var(--badge-live);
+  background: var(--badge-live-soft);
+  padding: 3px 10px;
+  border-radius: 999px;
+  letter-spacing: 0.02em;
+  user-select: none;
+}
+
+/* Pulsing dot before "زنده" — pure CSS animation */
+.card__badge::before {
+  content: '';
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  background: var(--badge-live);
+  border-radius: 50%;
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+
+@keyframes pulse-dot {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.4;
+    transform: scale(0.7);
+  }
+}
+
+/* Card Body — Price */
+.card__body {
+  text-align: center;
+  padding: var(--space-lg) 0;
+}
+
+.card__price {
+  font-size: var(--font-size-2xl);
+  font-weight: 900;
+  color: var(--text-primary);
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  /* Smooth number transition when value changes */
+  transition: opacity var(--transition-fast);
+}
+
+.card__price--loading {
+  opacity: 0.3;
+}
+
+.card__label {
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+  margin-top: var(--space-sm);
+}
+
+/* Card Footer */
+.card__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: var(--space-md);
+  border-top: 1px solid var(--border-color);
+}
+
+.card__update {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+}
+
+/* ---------- Refresh Button ---------- */
+.card__refresh-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
+  background: var(--accent-soft);
+  color: var(--accent);
+  border: 1px solid transparent;
+  border-radius: var(--border-radius-sm);
+  padding: var(--space-sm) var(--space-md);
+  font-family: var(--font-family);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--transition-fast),
+              border-color var(--transition-fast),
+              transform var(--transition-fast);
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.card__refresh-btn:hover {
+  background: rgba(59, 130, 246, 0.25);
+}
+
+.card__refresh-btn:active {
+  transform: scale(0.95);
+}
+
+/* Disabled state — active while "fetching" */
+.card__refresh-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Refresh icon */
+.refresh-icon {
+  flex-shrink: 0;
+  transition: transform var(--transition-normal);
+}
+
+/* Spinning animation while loading */
+.refresh-icon--spinning {
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ---------- Footer ---------- */
+#footer {
+  padding: var(--space-lg) 0 var(--space-sm);
+  text-align: center;
+}
+
+.footer__text {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  user-select: none;
+}
+
+/* ---------- Utility: Screen-reader only ---------- */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* ---------- Responsive ---------- */
+/* Extra-small devices (very narrow phones) */
+@media (max-width: 340px) {
+  :root {
+    --font-size-2xl: 1.75rem;
+    --space-lg: 18px;
+  }
+
+  .btn-text {
+    display: none; /* Icon-only on very small screens */
+  }
+}
+
+/* Larger phones and small tablets */
+@media (min-width: 420px) {
+  #app {
+    padding: var(--space-lg);
+  }
+
+  .card {
+    padding: var(--space-xl);
+  }
+}
+
+/* Landscape orientation on phones */
+@media (max-height: 500px) and (orientation: landscape) {
+  #header {
+    flex-direction: row;
+    align-items: center;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-sm);
+    padding: var(--space-sm) 0;
+  }
+
+  .header__subtitle {
+    margin-top: 0;
+  }
+
+  .card__body {
+    padding: var(--space-md) 0;
+  }
+}
+
+/* Prefers-reduced-motion — respect user's OS setting */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
