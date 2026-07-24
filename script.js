@@ -59,41 +59,28 @@ function renderPrice(price, now = new Date()) {
 // ============================================
 
 async function fetchRealPrice() {
-  // استفاده از API خارجی کوین گکو (ضد فیلتر و بدون نیاز به پروکسی)
-  const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=tether&vs_currencies=irr');
+  // استفاده از پروکسی قدرتمند allorigins برای دور زدن محدودیت تلگرام
+  const nobitexUrl = 'https://api.nobitex.ir/market/stats?src_currency=usdt&dst_currency=rls';
+  const proxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(nobitexUrl);
+  
+  const response = await fetch(proxyUrl);
   
   if (!response.ok) {
-    throw new Error('خطا در دریافت اطلاعات از سرور خارجی');
+    throw new Error('خطا در دریافت اطلاعات از سرور');
   }
   
   const data = await response.json();
   
-  // کوین گکو قیمت رو به ریال (irr) میده، برای تبدیل به تومان تقسیم بر ۱۰ می‌کنیم
-  const priceInRial = data.tether.irr;
-  const priceInToman = Math.round(priceInRial / 10);
+  // گرفتن قیمت و تبدیل از ریال به تومان
+  const priceString = data.stats["usdt-rls"].latest;
+  
+  // اطمینان از اینکه قیمت به عنوان عدد پردازش میشه (برای حل مشکل NaN)
+  const priceInToman = Math.floor(parseInt(priceString, 10) / 10);
 
   return {
     price: priceInToman,
     fetchedAt: new Date(),
   };
-}
-
-async function handleRefresh() {
-  if (DOM.refreshBtn.disabled) return;
-
-  setLoading(true);
-
-  try {
-    const { price, fetchedAt } = await fetchRealPrice();
-    renderPrice(price, fetchedAt);
-  } catch (error) {
-    console.error('[DeliHub] Refresh failed:', error);
-    // اگر ارور داد، به جای 0، متن ارور رو نشون بده تا کاربر بفهمه
-    DOM.priceValue.textContent = "ارور";
-    DOM.lastUpdate.textContent = "ارتباط با سرور ناموفق بود";
-  } finally {
-    setLoading(false);
-  }
 }
 
 // ============================================
