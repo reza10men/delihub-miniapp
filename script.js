@@ -59,20 +59,18 @@ function renderPrice(price, now = new Date()) {
 // ============================================
 
 async function fetchRealPrice() {
-  // استفاده از پروکسی برای دور زدن خطای CORS تلگرام
-  const proxyUrl = 'https://corsproxy.io/?url=' + encodeURIComponent('https://api.nobitex.ir/market/stats?src_currency=usdt&dst_currency=rls');
-  
-  const response = await fetch(proxyUrl);
+  // استفاده از API خارجی کوین گکو (ضد فیلتر و بدون نیاز به پروکسی)
+  const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=tether&vs_currencies=irr');
   
   if (!response.ok) {
-    throw new Error('خطا در دریافت اطلاعات از سرور نوبیتکس');
+    throw new Error('خطا در دریافت اطلاعات از سرور خارجی');
   }
   
   const data = await response.json();
   
-  // نوبیتکس قیمت رو به ریال میده، برای تبدیل به تومان تقسیم بر ۱۰ می‌کنیم
-  const priceString = data.stats["usdt-rls"].latest;
-  const priceInToman = parseInt(priceString, 10) / 10;
+  // کوین گکو قیمت رو به ریال (irr) میده، برای تبدیل به تومان تقسیم بر ۱۰ می‌کنیم
+  const priceInRial = data.tether.irr;
+  const priceInToman = Math.round(priceInRial / 10);
 
   return {
     price: priceInToman,
