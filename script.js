@@ -1,6 +1,6 @@
 /**
  * DeliHub Mini App — Phase 2
- * Now fetching real USDT/TOMAN price from Nobitex API.
+ * Now fetching real USDT/TOMAN price from Nobitex API (with CORS proxy).
  */
 
 // ============================================
@@ -59,8 +59,10 @@ function renderPrice(price, now = new Date()) {
 // ============================================
 
 async function fetchRealPrice() {
-  // دریافت قیمت واقعی تتر (USDT) به تومان از API نوبیتکس
-  const response = await fetch('https://api.nobitex.ir/market/stats?src_currency=usdt&dst_currency=rls');
+  // استفاده از پروکسی برای دور زدن خطای CORS تلگرام
+  const proxyUrl = 'https://corsproxy.io/?url=' + encodeURIComponent('https://api.nobitex.ir/market/stats?src_currency=usdt&dst_currency=rls');
+  
+  const response = await fetch(proxyUrl);
   
   if (!response.ok) {
     throw new Error('خطا در دریافت اطلاعات از سرور نوبیتکس');
@@ -68,12 +70,12 @@ async function fetchRealPrice() {
   
   const data = await response.json();
   
-  // نوبیتکس قیمت رو به صورت متن (String) میده، پس باید تبدیلش کنیم به عدد (Integer)
+  // نوبیتکس قیمت رو به ریال میده، برای تبدیل به تومان تقسیم بر ۱۰ می‌کنیم
   const priceString = data.stats["usdt-rls"].latest;
-  const price = parseInt(priceString, 10);
+  const priceInToman = parseInt(priceString, 10) / 10;
 
   return {
-    price: price,
+    price: priceInToman,
     fetchedAt: new Date(),
   };
 }
@@ -88,8 +90,9 @@ async function handleRefresh() {
     renderPrice(price, fetchedAt);
   } catch (error) {
     console.error('[DeliHub] Refresh failed:', error);
-    // اگر ارور داد، قیمت رو صفر نشون بده تا کاربر بفهمه مشکل داره
-    renderPrice(0, new Date()); 
+    // اگر ارور داد، به جای 0، متن ارور رو نشون بده تا کاربر بفهمه
+    DOM.priceValue.textContent = "ارور";
+    DOM.lastUpdate.textContent = "ارتباط با سرور ناموفق بود";
   } finally {
     setLoading(false);
   }
@@ -121,12 +124,6 @@ function initTelegramSDK() {
   }
 
   webApp.expand();
-
-  console.log('[DeliHub] Telegram SDK initialized.', {
-    platform: webApp.platform,
-    theme: webApp.colorScheme,
-    version: webApp.version,
-  });
 }
 
 // ============================================
@@ -136,5 +133,5 @@ function initTelegramSDK() {
 document.addEventListener('DOMContentLoaded', () => {
   initTelegramSDK();
   DOM.refreshBtn.addEventListener('click', handleRefresh);
-  handleRefresh(); // اولین بار قیمت رو خودکار می‌گیره
+  handleRefresh();
 });
